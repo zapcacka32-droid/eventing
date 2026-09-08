@@ -1,0 +1,8 @@
+op_webhook.tar filter=lfs diff=lfs merge=lfs -text
+operator.tar filter=lfs diff=lfs merge=lfs -text
+operator_webhook.tar filter=lfs diff=lfs merge=lfs -text
+operator-webhook.tar filter=lfs diff=lfs merge=lfs -text
+webhook21.tar filter=lfs diff=lfs merge=lfs -text
+operator21.tar filter=lfs diff=lfs merge=lfs -text
+busybox-1.36.tar filter=lfs diff=lfs merge=lfs -text
+serving-v1.22.1/*.tar filter=lfs diff=lfs merge=lfs -text

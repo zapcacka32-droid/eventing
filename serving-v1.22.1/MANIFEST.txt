@@ -1,0 +1,16 @@
+# Knative Serving v1.22.1 (linux/amd64)
+# source proxy-cache: harbor.devops-labs.ru/gcr-proxy
+# tags in tar: harbor.idp.ecpk.test/core/knative/<name>:v1.22.1
+# load: docker load -i <name>-v1.22.1.tar
+# push: docker push harbor.idp.ecpk.test/core/knative/<name>:v1.22.1
+
+activator  harbor.idp.ecpk.test/core/knative/activator:v1.22.1  <=  harbor.devops-labs.ru/gcr-proxy/knative-releases/knative.dev/serving/cmd/activator@sha256:5deaef961fef8d1417f6d4a4dfae2fc338f2d30d72c4ad58c3ab392b2c04705b
+autoscaler  harbor.idp.ecpk.test/core/knative/autoscaler:v1.22.1  <=  harbor.devops-labs.ru/gcr-proxy/knative-releases/knative.dev/serving/cmd/autoscaler@sha256:5bae38655d87df86b041083fbe51791816473245f752432ba9b85a7b12f73cd5
+controller  harbor.idp.ecpk.test/core/knative/controller:v1.22.1  <=  harbor.devops-labs.ru/gcr-proxy/knative-releases/knative.dev/serving/cmd/controller@sha256:94329d85200c2fc31ed1166a26568ca1357376c149c147e71f400cf28be3c816
+webhook  harbor.idp.ecpk.test/core/knative/webhook:v1.22.1  <=  harbor.devops-labs.ru/gcr-proxy/knative-releases/knative.dev/serving/cmd/webhook@sha256:8470456be214e93a84e3c7b79a632aa9978bd8ecda553feaa47878a2c24ab84d
+queue  harbor.idp.ecpk.test/core/knative/queue:v1.22.1  <=  harbor.devops-labs.ru/gcr-proxy/knative-releases/knative.dev/serving/cmd/queue@sha256:b1af8bda6c1d32b1cf5fbf8f1f6068c5007a5cebf091039fdea83b88b1fd87f4
+autoscaler-hpa  harbor.idp.ecpk.test/core/knative/autoscaler-hpa:v1.22.1  <=  harbor.devops-labs.ru/gcr-proxy/knative-releases/knative.dev/serving/cmd/autoscaler-hpa@sha256:5e5cb34096b58befe77e9c27f003cde97e7707e9dd047e1d50786892cb566dbf
+migrate  harbor.idp.ecpk.test/core/knative/migrate:v1.22.1  <=  harbor.devops-labs.ru/gcr-proxy/knative-releases/knative.dev/pkg/apiextensions/storageversion/cmd/migrate@sha256:049f9cb03f4867b3bc4eb6043a33bf8673603fc4ce99c02e7953df049ad63844
+cleanup  harbor.idp.ecpk.test/core/knative/cleanup:v1.22.1  <=  harbor.devops-labs.ru/gcr-proxy/knative-releases/knative.dev/serving/pkg/cleanup/cmd/cleanup@sha256:6f771871352be1f9266615b119d85d949c7acf305316de021dd9c17c3d92e219
+net-istio-controller  harbor.idp.ecpk.test/core/knative/net-istio-controller:v1.22.1  <=  harbor.devops-labs.ru/gcr-proxy/knative-releases/knative.dev/net-istio/cmd/controller@sha256:61d0004be98355e09a13a8aa1b8006f2cbd91a45944e9e088b45d06901b372f6
+net-istio-webhook  harbor.idp.ecpk.test/core/knative/net-istio-webhook:v1.22.1  <=  harbor.devops-labs.ru/gcr-proxy/knative-releases/knative.dev/net-istio/cmd/webhook@sha256:d2b95b499d71107060f9c8d523314bb26d8f95e7c558c2472d2e61a3ce2d1462
