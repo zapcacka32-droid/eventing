@@ -11,3 +11,4 @@ eventing-gitlab-*-v1.22.1.tar filter=lfs diff=lfs merge=lfs -text
 namespace-main.zip filter=lfs diff=lfs merge=lfs -text
 knative-serving-main.zip filter=lfs diff=lfs merge=lfs -text
 knative-eventing-main(1).zip filter=lfs diff=lfs merge=lfs -text
+policies-main.zip filter=lfs diff=lfs merge=lfs -text
