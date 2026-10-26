@@ -1,0 +1,363 @@
+# EDP techsec-dev, прод. Неймспейсы по ТПР.
+# Образы: registry-gl.ecpk-rosneft.ru, как в ТПР.
+# Реплики и requests/limits — таблица компонентов ТПР.
+# httpd раздачи манифестов в чарте зафиксирован на 1 реплике, в ТПР указано 2.
+---
+kafkaBootstrap: knative-kafka-server-kafka-bootstrap.ecpk-knative-kafka.svc.cluster.local:9092
+controlPlane:
+  create: false
+  namespace: ecpk-knative-eventing
+platformManifests:
+  enabled: true
+  name: eventing-kafka-manifests
+  files:
+  - eventing-kafka-v1.22.1.yaml
+  - gitlab-source-v1.22.1.yaml
+  image: registry-gl.ecpk-rosneft.ru/ecpk/core/busybox:1.36
+  imagePullSecrets: []
+kafkaPodsDefaultingWebhook:
+  enabled: true
+  failurePolicy: Fail
+  timeoutSeconds: 2
+brokerIngressDedup:
+  enabled: true
+  image: registry-gl.ecpk-rosneft.ru/ecpk/core/broker-ingress-dedup:0.1.0
+  imagePullPolicy: Always
+  imagePullSecrets: []
+  replicas: 2
+  brokerIngressUrl: ''
+knativeEventing:
+  name: knative-eventing
+  version: 1.22.1
+  defaultBrokerClass: Kafka
+  highAvailability:
+    enabled: true
+    replicas: 3
+  annotations:
+    cpaas.io/display-name: knative-eventing
+  registry:
+    default: registry-gl.ecpk-rosneft.ru/ecpk/core/${NAME}:v1.22.1
+    override:
+      eventing-controller/eventing-controller: registry-gl.ecpk-rosneft.ru/ecpk/core/eventing-controller:v1.22.1
+      eventing-controller/controller: registry-gl.ecpk-rosneft.ru/ecpk/core/eventing-controller:v1.22.1
+      controller: registry-gl.ecpk-rosneft.ru/ecpk/core/eventing-controller:v1.22.1
+      eventing-webhook/eventing-webhook: registry-gl.ecpk-rosneft.ru/ecpk/core/eventing-webhook:v1.22.1
+      eventing-webhook/webhook: registry-gl.ecpk-rosneft.ru/ecpk/core/eventing-webhook:v1.22.1
+      webhook: registry-gl.ecpk-rosneft.ru/ecpk/core/eventing-webhook:v1.22.1
+      jobsink: registry-gl.ecpk-rosneft.ru/ecpk/core/job-sink:v1.22.1
+      job-sink/jobsink: registry-gl.ecpk-rosneft.ru/ecpk/core/job-sink:v1.22.1
+      job-sink/job-sink: registry-gl.ecpk-rosneft.ru/ecpk/core/job-sink:v1.22.1
+      mt-broker-filter/filter: registry-gl.ecpk-rosneft.ru/ecpk/core/mt-broker-filter:v1.22.1
+      mt-broker-filter/mt-broker-filter: registry-gl.ecpk-rosneft.ru/ecpk/core/mt-broker-filter:v1.22.1
+      filter: registry-gl.ecpk-rosneft.ru/ecpk/core/mt-broker-filter:v1.22.1
+      mt-broker-ingress/ingress: registry-gl.ecpk-rosneft.ru/ecpk/core/mt-broker-ingress:v1.22.1
+      mt-broker-ingress/mt-broker-ingress: registry-gl.ecpk-rosneft.ru/ecpk/core/mt-broker-ingress:v1.22.1
+      ingress: registry-gl.ecpk-rosneft.ru/ecpk/core/mt-broker-ingress:v1.22.1
+      mt-broker-controller/mt-broker-controller: registry-gl.ecpk-rosneft.ru/ecpk/core/mt-broker-controller:v1.22.1
+      request-reply/request-reply: registry-gl.ecpk-rosneft.ru/ecpk/core/request-reply:v1.22.1
+      requestreply: registry-gl.ecpk-rosneft.ru/ecpk/core/request-reply:v1.22.1
+      kafka-webhook-eventing: registry-gl.ecpk-rosneft.ru/ecpk/core/kafka-webhook:v1.22.1-ecpk.1
+      kafka-webhook-eventing/kafka-webhook-eventing: registry-gl.ecpk-rosneft.ru/ecpk/core/kafka-webhook:v1.22.1-ecpk.1
+      kafka-controller: registry-gl.ecpk-rosneft.ru/ecpk/core/kafka-controller:v1.22.1
+      kafka-controller/controller: registry-gl.ecpk-rosneft.ru/ecpk/core/kafka-controller:v1.22.1
+      kafka-controller/kafka-controller: registry-gl.ecpk-rosneft.ru/ecpk/core/kafka-controller:v1.22.1
+      kafka-broker-receiver: registry-gl.ecpk-rosneft.ru/ecpk/core/kafka-receiver:v1.22.1
+      kafka-channel-receiver: registry-gl.ecpk-rosneft.ru/ecpk/core/kafka-receiver:v1.22.1
+      kafka-sink-receiver: registry-gl.ecpk-rosneft.ru/ecpk/core/kafka-receiver:v1.22.1
+      kafka-broker-dispatcher: registry-gl.ecpk-rosneft.ru/ecpk/core/kafka-dispatcher:v1.22.1
+      kafka-channel-dispatcher: registry-gl.ecpk-rosneft.ru/ecpk/core/kafka-dispatcher:v1.22.1
+      kafka-source-dispatcher: registry-gl.ecpk-rosneft.ru/ecpk/core/kafka-dispatcher:v1.22.1
+      gitlab-controller-manager/manager: registry-gl.ecpk-rosneft.ru/ecpk/core/eventing-gitlab-controller:v1.22.1
+      gitlab-webhook/gitlab-webhook: registry-gl.ecpk-rosneft.ru/ecpk/core/eventing-gitlab-webhook:v1.22.1
+    imagePullSecrets: []
+  additionalManifests: []
+  config:
+    br-defaults:
+      default-br-config: |
+        clusterDefault:
+          apiVersion: v1
+          brokerClass: Kafka
+          delivery:
+            backoffDelay: PT0.5S
+            backoffPolicy: exponential
+            retry: 10
+          kind: ConfigMap
+          name: kafka-broker-config
+          namespace: {{ .Values.controlPlane.namespace }}
+        namespace-selector:
+          matchLabels:
+            knative-eventing-injection: enabled
+    config-br-default-channel:
+      channel-template-spec: |
+        apiVersion: messaging.knative.dev/v1
+        kind: KafkaChannel
+        spec:
+          numPartitions: 3
+          replicationFactor: 3
+    config-features:
+      imc-dispatcher.enabled: 'false'
+      kafka.broker.enabled: 'true'
+      kafka.source.enabled: 'true'
+      mt-broker-filter.enabled: 'false'
+      mt-broker-ingress.enabled: 'false'
+      multi-tenant-channel-based-broker.enabled: 'false'
+      rabbitmq.broker.enabled: 'false'
+    logging:
+      loglevel.controller: info
+      loglevel.webhook: info
+    kafka-broker-config:
+      bootstrap.servers: "{{ .Values.kafkaBootstrap }}"
+      auth.secret.ref.name: knative-kafka-server-super-user
+      default.topic.partitions: '3'
+      default.topic.replication.factor: '3'
+      auto.create.topics.enable: 'true'
+      topic.name: "{{ .Values.controlPlane.namespace }}"
+    kafka-channel-config:
+      bootstrap.servers: "{{ .Values.kafkaBootstrap }}"
+      default.topic.partitions: '3'
+      default.topic.replication.factor: '3'
+      default.topic.retention.ms: '604800000'
+      auth.secret.ref.name: knative-kafka-server-super-user
+      auth.secret.ref.namespace: "{{ .Values.controlPlane.namespace }}"
+      topic.name: "{{ .Values.controlPlane.namespace }}-channel"
+    config-kafka-broker-data-plane:
+      config-kafka-broker-producer.properties: |
+        enable.idempotence=true
+        acks=all
+        max.in.flight.requests.per.connection=5
+        retries=2147483647
+      config-kafka-broker-consumer.properties: |
+        enable.auto.commit=false
+        isolation.level=read_uncommitted
+    features:
+      delivery-timeout: enabled
+      new-apiserversource-filters: enabled
+  workloads:
+    - name: mt-broker-controller
+      replicas: 0
+      resources:
+        - container: mt-broker-controller
+          requests:
+            cpu: 20m
+            memory: 50Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+    - name: mt-broker-filter
+      replicas: 0
+      resources:
+        - container: filter
+          requests:
+            cpu: 20m
+            memory: 50Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+    - name: mt-broker-ingress
+      replicas: 0
+      resources:
+        - container: ingress
+          requests:
+            cpu: 20m
+            memory: 50Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+    - name: imc-controller
+      replicas: 0
+      resources:
+        - container: controller
+          requests:
+            cpu: 20m
+            memory: 50Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+    - name: imc-dispatcher
+      replicas: 0
+      resources:
+        - container: dispatcher
+          requests:
+            cpu: 20m
+            memory: 50Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+    - name: job-sink
+      replicas: 1
+      resources:
+        - container: job-sink
+          requests:
+            cpu: 125m
+            memory: 64Mi
+          limits:
+            cpu: "1"
+            memory: 2Gi
+    - name: request-reply
+      replicas: 2
+      resources:
+        - container: request-reply
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+    - name: gitlab-controller
+      replicas: 2
+      resources:
+        - container: manager
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+    - name: gitlab-webhook
+      replicas: 2
+      resources:
+        - container: gitlab-webhook
+          requests:
+            cpu: 100m
+            memory: 50Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi
+    - name: kafka-broker-receiver
+      replicas: 3
+      resources:
+        - container: kafka-broker-receiver
+          requests:
+            cpu: 200m
+            memory: 450Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+    - name: kafka-broker-dispatcher
+      replicas: 3
+      resources:
+        - container: kafka-broker-dispatcher
+          requests:
+            cpu: 200m
+            memory: 450Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+    - name: kafka-channel-receiver
+      replicas: 3
+      resources:
+        - container: kafka-channel-receiver
+          requests:
+            cpu: 200m
+            memory: 450Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+    - name: kafka-channel-dispatcher
+      replicas: 3
+      resources:
+        - container: kafka-channel-dispatcher
+          requests:
+            cpu: 200m
+            memory: 450Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+    - name: kafka-sink-receiver
+      replicas: 2
+      resources:
+        - container: kafka-sink-receiver
+          requests:
+            cpu: 200m
+            memory: 450Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+    - name: kafka-source-dispatcher
+      replicas: 2
+      resources:
+        - container: kafka-source-dispatcher
+          requests:
+            cpu: 200m
+            memory: 450Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+    - name: storage-version-migration-eventing-
+      resources:
+        - container: migrate
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+    - name: eventing-controller
+      replicas: 3
+      resources:
+        - container: eventing-controller
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi
+    - name: eventing-webhook
+      replicas: 3
+      resources:
+        - container: eventing-webhook
+          requests:
+            cpu: 100m
+            memory: 50Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi
+      env:
+        - container: eventing-webhook
+          envVars:
+            - name: DISABLE_OBSERVABILITY
+              value: "true"
+    - name: kafka-controller
+      replicas: 3
+      resources:
+        - container: controller
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits:
+            cpu: 500m
+            memory: 500Mi
+      env:
+        - container: controller
+          envVars:
+            - name: BROKER_DATA_PLANE_CONFIG_MAP_NAMESPACE
+              value: "{{ .Values.controlPlane.namespace }}"
+            - name: CHANNEL_DATA_PLANE_CONFIG_MAP_NAMESPACE
+              value: "{{ .Values.controlPlane.namespace }}"
+            - name: SINK_DATA_PLANE_CONFIG_MAP_NAMESPACE
+              value: "{{ .Values.controlPlane.namespace }}"
+            - name: BROKER_SYSTEM_NAMESPACE
+              value: "{{ .Values.controlPlane.namespace }}"
+            - name: CHANNEL_SYSTEM_NAMESPACE
+              value: "{{ .Values.controlPlane.namespace }}"
+            - name: SINK_SYSTEM_NAMESPACE
+              value: "{{ .Values.controlPlane.namespace }}"
+            - name: KAFKA_BROKERS
+              value: "{{ .Values.kafkaBootstrap }}"
+            - name: SYSTEM_NAMESPACE
+              value: "{{ .Values.controlPlane.namespace }}"
+    - name: kafka-webhook-eventing
+      replicas: 3
+      resources:
+        - container: kafka-webhook-eventing
+          requests:
+            cpu: 100m
+            memory: 50Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi
+      env:
+        - container: kafka-webhook-eventing
+          envVars:
+            - name: SYSTEM_NAMESPACE
+              value: "{{ .Values.controlPlane.namespace }}"

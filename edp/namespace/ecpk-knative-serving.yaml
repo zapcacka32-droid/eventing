@@ -1,0 +1,47 @@
+# Чарт namespace 7.0.3. EDP, контур techsec-dev, считаем продом.
+# Имя из ТПР. Serving в сетку не входит.
+# Квота в ТПР: 2 CPU и 2Gi. Limits activator, autoscaler и controller
+# по 1000m на 3 реплики в неё не помещаются, поэтому запас под таблицу компонентов.
+enabled: true
+
+identity:
+  instance: ed
+  cluster: tco
+  project: ecpk
+
+global:
+  namespacePurpose: serving
+  namespaceOverride: ecpk-knative-serving
+
+namespace:
+  displayName: ecpk-knative-serving
+  role: other
+  creator: lk
+  podSecurity: ""
+  cpaas:
+    cluster: techsec-dev
+    project: ecpk
+
+serviceMesh:
+  enabled: false
+  discovery: false
+  never: true
+  waypoint: false
+
+resourceQuotas:
+  limits:
+    cpu: "16"
+    memory: "16Gi"
+  requests:
+    cpu: "2"
+    memory: "2Gi"
+  podsAmount: 200
+  storage:
+    topolvm-mu: ""
+    topolvm-ri: ""
+    ceph-rbd: ""
+    ceph-rgw: ""
+    cephfs-hot: ""
+
+subnet:
+  enabled: false

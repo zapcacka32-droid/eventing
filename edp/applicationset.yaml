@@ -1,0 +1,202 @@
+# EDP, контур techsec-dev. Запуск из каталога edp/ этого репозитория.
+# Очередь RollingSync: неймспейсы, политика Kafka, Serving и Kafka, Eventing, остальные политики.
+# Eventing после Kafka: ему нужен bootstrap. Политики Eventing последними:
+# первый NetworkPolicy закрывает webhook от kube-apiserver.
+# На контроллере нужен applicationsetcontroller.enable.progressive.syncs=true.
+# Без флага все волны стартуют вместе.
+# Из delivery-components-list git только knative-platform: values, каталог edp/.
+# Остальное — чарты registry-gl.ecpk.rosneft.ru/managed-services, repoURL без oci://.
+# Kafka — git http://gitea-gl.ecpk.rosneft.ru/core/helmchart-kafka.git, путь kafka-1.0.1-test.
+# Образы в values — registry-gl.ecpk-rosneft.ru, как в ТПР.
+# Подсети в values нет: CIDR в ТПР не задан.
+# Шлюз ed-tco-igw-knative: VIP 10.193.98.102, 443, волна 4.
+# Не применять на кластере, где уже есть другой KnativeEventing или KnativeServing.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: ecpk-knative-edp
+  namespace: tech-argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  destination:
+    namespace: ecpk-knative-eventing
+    server: https://kubernetes.default.svc
+  source:
+    path: edp
+    repoURL: http://gitea-gl.ecpk.rosneft.ru/core/knative-platform.git
+    targetRevision: main
+  sources: []
+  project: ecpk-core
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  strategy:
+    type: RollingSync
+    rollingSync:
+      steps:
+        - matchExpressions:
+            - key: deploy-wave
+              operator: In
+              values: ["0"]
+        - matchExpressions:
+            - key: deploy-wave
+              operator: In
+              values: ["1"]
+        - matchExpressions:
+            - key: deploy-wave
+              operator: In
+              values: ["2"]
+        - matchExpressions:
+            - key: deploy-wave
+              operator: In
+              values: ["3"]
+        - matchExpressions:
+            - key: deploy-wave
+              operator: In
+              values: ["4"]
+  generators:
+    - list:
+        elements:
+          - appName: namespace-ecpk-knative-eventing
+            wave: "0"
+            destNamespace: ecpk-knative-eventing
+            releaseName: namespace
+            createNs: "true"
+            chartRepo: registry-gl.ecpk.rosneft.ru/managed-services
+            chartName: namespace
+            chartPath: ""
+            chartRevision: "7.0.3"
+            valuesFile: $values/edp/namespace/ecpk-knative-eventing.yaml
+          - appName: namespace-ecpk-knative-serving
+            wave: "0"
+            destNamespace: ecpk-knative-serving
+            releaseName: namespace
+            createNs: "true"
+            chartRepo: registry-gl.ecpk.rosneft.ru/managed-services
+            chartName: namespace
+            chartPath: ""
+            chartRevision: "7.0.3"
+            valuesFile: $values/edp/namespace/ecpk-knative-serving.yaml
+          - appName: namespace-ecpk-knative-kafka
+            wave: "0"
+            destNamespace: ecpk-knative-kafka
+            releaseName: namespace
+            createNs: "true"
+            chartRepo: registry-gl.ecpk.rosneft.ru/managed-services
+            chartName: namespace
+            chartPath: ""
+            chartRevision: "7.0.3"
+            valuesFile: $values/edp/namespace/ecpk-knative-kafka.yaml
+          - appName: policies-ecpk-knative-kafka
+            wave: "1"
+            destNamespace: ecpk-knative-kafka
+            releaseName: policies
+            createNs: "false"
+            chartRepo: registry-gl.ecpk.rosneft.ru/managed-services
+            chartName: policies
+            chartPath: ""
+            chartRevision: "0.6.3"
+            valuesFile: $values/edp/policies/ecpk-knative-kafka.yaml
+          - appName: ecpk-knative-serving
+            wave: "2"
+            destNamespace: ecpk-knative-serving
+            releaseName: knative-serving
+            createNs: "false"
+            chartRepo: registry-gl.ecpk.rosneft.ru/managed-services
+            chartName: knative-serving
+            chartPath: ""
+            chartRevision: "0.1.2"
+            valuesFile: $values/edp/app/serving/ecpk-knative-serving.yaml
+          - appName: ecpk-knative-kafka
+            wave: "2"
+            destNamespace: ecpk-knative-kafka
+            releaseName: knative-kafka-server
+            createNs: "false"
+            chartRepo: http://gitea-gl.ecpk.rosneft.ru/core/helmchart-kafka.git
+            chartName: ""
+            chartPath: kafka-1.0.1-test
+            chartRevision: main
+            valuesFile: $values/edp/kafka-cluster/ecpk-knative-kafka.yaml
+          - appName: ecpk-knative-eventing
+            wave: "3"
+            destNamespace: ecpk-knative-eventing
+            releaseName: knative-eventing
+            createNs: "false"
+            chartRepo: registry-gl.ecpk.rosneft.ru/managed-services
+            chartName: knative-eventing-config
+            chartPath: ""
+            chartRevision: "0.3.17"
+            valuesFile: $values/edp/app/eventing/ecpk-knative-eventing.yaml
+          - appName: igw-ecpk-knative-serving
+            wave: "4"
+            destNamespace: ecpk-knative-serving
+            releaseName: ingress-gateway
+            createNs: "false"
+            chartRepo: registry-gl.ecpk.rosneft.ru/managed-services
+            chartName: ingress-gateway
+            chartPath: ""
+            chartRevision: "12"
+            valuesFile: $values/edp/ingress-gateway/ecpk-knative-serving.yaml
+          - appName: policies-ecpk-knative-eventing
+            wave: "4"
+            destNamespace: ecpk-knative-eventing
+            releaseName: policies
+            createNs: "false"
+            chartRepo: registry-gl.ecpk.rosneft.ru/managed-services
+            chartName: policies
+            chartPath: ""
+            chartRevision: "0.6.3"
+            valuesFile: $values/edp/policies/ecpk-knative-eventing.yaml
+          - appName: policies-ecpk-knative-serving
+            wave: "4"
+            destNamespace: ecpk-knative-serving
+            releaseName: policies
+            createNs: "false"
+            chartRepo: registry-gl.ecpk.rosneft.ru/managed-services
+            chartName: policies
+            chartPath: ""
+            chartRevision: "0.6.3"
+            valuesFile: $values/edp/policies/ecpk-knative-serving.yaml
+  template:
+    metadata:
+      name: '{{.appName}}'
+      labels:
+        deploy-wave: '{{.wave}}'
+    spec:
+      project: ecpk-core
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{.destNamespace}}'
+      syncPolicy:
+        automated:
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace={{.createNs}}
+          - ApplyOutOfSyncOnly=true
+          - SkipDryRunOnMissingResource=true
+          # ConfigMap eventing-kafka-manifests ~255 КБ: client-side apply кладёт его копию
+          # в last-applied-configuration и упирается в лимит аннотаций 256 КБ.
+          - ServerSideApply=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
+  templatePatch: |
+    spec:
+      sources:
+        - repoURL: {{.chartRepo | quote}}
+          targetRevision: {{.chartRevision | quote}}
+          {{- if .chartName}}
+          chart: {{.chartName | quote}}
+          {{- else}}
+          path: {{.chartPath | quote}}
+          {{- end}}
+          helm:
+            releaseName: {{.releaseName | quote}}
+            valueFiles:
+              - {{.valuesFile | quote}}
+        - repoURL: http://gitea-gl.ecpk.rosneft.ru/core/knative-platform.git
+          targetRevision: main
+          ref: values

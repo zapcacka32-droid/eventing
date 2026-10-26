@@ -1,0 +1,102 @@
+# EDP techsec-dev, прод. Неймспейс ecpk-knative-serving.
+# Домен шлюза ТПР: *.knative.edp.ecpk.test.
+fullnameOverride: knative-serving
+controlPlane:
+  create: false
+  namespace: ecpk-knative-serving
+serving:
+  version: 1.22.1
+  highAvailability:
+    replicas: 3
+  registry:
+    default: registry-gl.ecpk-rosneft.ru/ecpk/core/${NAME}:v1.22.1
+    override:
+      migrate: registry-gl.ecpk-rosneft.ru/ecpk/core/migrate:v1.22.1
+      cleanup: registry-gl.ecpk-rosneft.ru/ecpk/core/cleanup:v1.22.1
+      queue-proxy: registry-gl.ecpk-rosneft.ru/ecpk/core/queue:v1.22.1
+  ingress:
+    kourier:
+      enabled: false
+  config:
+    deployment:
+      queue-sidecar-image: registry-gl.ecpk-rosneft.ru/ecpk/core/queue:v1.22.1
+    network:
+      ingress-class: istio.ingress.networking.knative.dev
+    domain:
+      knative.edp.ecpk.test: ''
+    observability:
+      metrics.backend-destination: none
+      metrics.enable-proxy: 'false'
+      metrics.port: '0'
+      tracing.enabled: 'false'
+  workloads:
+    - name: activator
+      replicas: 3
+      resources:
+        - container: activator
+          requests:
+            cpu: 100m
+            memory: 60Mi
+          limits:
+            cpu: "1"
+            memory: 600Mi
+    - name: autoscaler
+      replicas: 3
+      resources:
+        - container: autoscaler
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: "1"
+            memory: 1Gi
+    - name: autoscaler-hpa
+      replicas: 2
+      resources:
+        - container: autoscaler-hpa
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi
+    - name: controller
+      replicas: 3
+      resources:
+        - container: controller
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: "1"
+            memory: 1Gi
+    - name: webhook
+      replicas: 3
+      resources:
+        - container: webhook
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 500m
+            memory: 500Mi
+    - name: net-istio-controller
+      replicas: 2
+      resources:
+        - container: controller
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 500m
+            memory: 500Mi
+    - name: net-istio-webhook
+      replicas: 2
+      resources:
+        - container: webhook
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 500m
+            memory: 500Mi

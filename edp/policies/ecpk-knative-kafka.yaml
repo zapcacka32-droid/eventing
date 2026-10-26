@@ -1,0 +1,42 @@
+# ecpk-knative-kafka. По ТПР: ingress на брокеры, без egress.
+# Порты 9092, 9091 и 15008. 9090 добавлен для кворума KRaft.
+# Селектор strimzi.io/name соответствует имени кластера knative-kafka-server.
+# Сеть узлов EDP в ТПР не указана.
+
+identity:
+  instance: ed
+  cluster: tco
+  project: ecpk
+
+policies: []
+
+netpol:
+  - name: in
+    selector:
+      strimzi.io/name: knative-kafka-server-kafka
+    ingress:
+      - from:
+          - namespace: ecpk-knative-eventing
+          - namespace: ecpk-knative-kafka
+          - namespace: ecpk-knative-operator
+        ports:
+          - port: 9092
+          - port: 9091
+          - port: 9090
+          - port: 15008
+
+authzpol:
+  - name: in
+    action: ALLOW
+    selector:
+      strimzi.io/name: knative-kafka-server-kafka
+    rules:
+      - from:
+          namespaces:
+            - ecpk-knative-eventing
+            - ecpk-knative-kafka
+            - ecpk-knative-operator
+        ports:
+          - port: 9092
+          - port: 9091
+          - port: 9090

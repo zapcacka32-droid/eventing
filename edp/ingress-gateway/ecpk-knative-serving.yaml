@@ -1,0 +1,27 @@
+# EDP techsec-dev. Шлюз из ТПР: ed-tco-igw-knative.
+# FQDN *.knative.edp.ecpk.test, VIP 10.193.98.102, 443 HTTPS/TCP, маршрутизация */*.
+# Релиз в ecpk-knative-serving, рядом с доменом Knative.
+# Чарт собирает имя как {instance}-{cluster}-igw-{project}-{name}:
+# получится ed-tco-igw-ecpk-knative. В таблице ТПР сегмента проекта нет.
+# Бэкенд в таблице не назван, маршрут не создаётся.
+# Сертификат для Terminate не задан, слушатель в режиме Passthrough.
+
+identity:
+  instance: ed
+  cluster: tco
+  project: ecpk
+
+policies:
+  enabled: true
+
+gateways:
+  - name: knative
+    ipAddress: 10.193.98.102
+    listeners:
+      - name: https
+        port: 443
+        protocol: HTTPS
+        hostname: "*.knative.edp.ecpk.test"
+        tlsMode: Passthrough
+
+xroutes: []

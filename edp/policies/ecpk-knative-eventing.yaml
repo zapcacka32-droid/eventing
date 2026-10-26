@@ -1,0 +1,373 @@
+# ecpk-knative-eventing, EDP techsec-dev. Имя неймспейса из ТПР.
+# Ingress только на webhook, data-plane и раздачу манифестов.
+# Сеть узлов EDP в ТПР не указана: адрес kube-apiserver сюда не добавлен.
+
+identity:
+  instance: ed
+  cluster: tco
+  project: ecpk
+
+policies: []
+
+netpol:
+  - name: wh
+    selector:
+      app: eventing-webhook
+    ingress:
+      - from:
+          - namespace: ecpk-knative-eventing
+          - namespace: ecpk-knative-serving
+          - namespace: ecpk-knative-kafka
+          - namespace: ecpk-knative-operator
+          - namespace: kube-system
+          # Проба kubelet в ambient: link-local и join-подсеть kube-ovn.
+          - ipBlock:
+              cidr: 169.254.7.127/32
+          - ipBlock:
+              cidr: 100.96.0.0/16
+        ports:
+          - port: 443
+          - port: 8443
+          - port: 15008
+  - name: kwh
+    selector:
+      app: kafka-webhook-eventing
+    ingress:
+      - from:
+          - namespace: ecpk-knative-eventing
+          - namespace: ecpk-knative-serving
+          - namespace: ecpk-knative-kafka
+          - namespace: ecpk-knative-operator
+          - namespace: kube-system
+          # Проба kubelet в ambient: link-local и join-подсеть kube-ovn.
+          - ipBlock:
+              cidr: 169.254.7.127/32
+          - ipBlock:
+              cidr: 100.96.0.0/16
+        ports:
+          - port: 443
+          - port: 8443
+          - port: 15008
+  - name: brcv
+    selector:
+      app: kafka-broker-receiver
+    ingress:
+      - from:
+          - namespace: ecpk-knative-eventing
+          - namespace: ecpk-knative-serving
+          - namespace: ecpk-knative-kafka
+          - namespace: ecpk-knative-operator
+          - namespace: kube-system
+          # Проба kubelet в ambient: link-local и join-подсеть kube-ovn.
+          - ipBlock:
+              cidr: 169.254.7.127/32
+          - ipBlock:
+              cidr: 100.96.0.0/16
+        ports:
+          - port: 8080
+          - port: 8443
+          - port: 9090
+          - port: 15008
+  - name: bdsp
+    selector:
+      app: kafka-broker-dispatcher
+    ingress:
+      - from:
+          - namespace: ecpk-knative-eventing
+          - namespace: ecpk-knative-serving
+          - namespace: ecpk-knative-kafka
+          - namespace: ecpk-knative-operator
+          - namespace: kube-system
+          # Проба kubelet в ambient: link-local и join-подсеть kube-ovn.
+          - ipBlock:
+              cidr: 169.254.7.127/32
+          - ipBlock:
+              cidr: 100.96.0.0/16
+        ports:
+          - port: 8080
+          - port: 8443
+          - port: 9090
+          - port: 15008
+  - name: crcv
+    selector:
+      app: kafka-channel-receiver
+    ingress:
+      - from:
+          - namespace: ecpk-knative-eventing
+          - namespace: ecpk-knative-serving
+          - namespace: ecpk-knative-kafka
+          - namespace: ecpk-knative-operator
+          - namespace: kube-system
+          # Проба kubelet в ambient: link-local и join-подсеть kube-ovn.
+          - ipBlock:
+              cidr: 169.254.7.127/32
+          - ipBlock:
+              cidr: 100.96.0.0/16
+        ports:
+          - port: 8080
+          - port: 8443
+          - port: 9090
+          - port: 15008
+  - name: cdsp
+    selector:
+      app: kafka-channel-dispatcher
+    ingress:
+      - from:
+          - namespace: ecpk-knative-eventing
+          - namespace: ecpk-knative-serving
+          - namespace: ecpk-knative-kafka
+          - namespace: ecpk-knative-operator
+          - namespace: kube-system
+          # Проба kubelet в ambient: link-local и join-подсеть kube-ovn.
+          - ipBlock:
+              cidr: 169.254.7.127/32
+          - ipBlock:
+              cidr: 100.96.0.0/16
+        ports:
+          - port: 8080
+          - port: 8443
+          - port: 9090
+          - port: 15008
+  - name: srcv
+    selector:
+      app: kafka-sink-receiver
+    ingress:
+      - from:
+          - namespace: ecpk-knative-eventing
+          - namespace: ecpk-knative-serving
+          - namespace: ecpk-knative-kafka
+          - namespace: ecpk-knative-operator
+          - namespace: kube-system
+          # Проба kubelet в ambient: link-local и join-подсеть kube-ovn.
+          - ipBlock:
+              cidr: 169.254.7.127/32
+          - ipBlock:
+              cidr: 100.96.0.0/16
+        ports:
+          - port: 8080
+          - port: 8443
+          - port: 9090
+          - port: 15008
+  - name: sdisp
+    selector:
+      app: kafka-source-dispatcher
+    ingress:
+      - from:
+          - namespace: ecpk-knative-eventing
+          - namespace: ecpk-knative-serving
+          - namespace: ecpk-knative-kafka
+          - namespace: ecpk-knative-operator
+          - namespace: kube-system
+          # Проба kubelet в ambient: link-local и join-подсеть kube-ovn.
+          - ipBlock:
+              cidr: 169.254.7.127/32
+          - ipBlock:
+              cidr: 100.96.0.0/16
+        ports:
+          - port: 8080
+          - port: 8443
+          - port: 9090
+          - port: 15008
+  - name: dedup
+    selector:
+      app: broker-ingress-dedup
+    ingress:
+      - from:
+          - namespace: ecpk-knative-eventing
+          - namespace: ecpk-knative-serving
+          - namespace: ecpk-knative-kafka
+          - namespace: ecpk-knative-operator
+          - namespace: kube-system
+          # Проба kubelet в ambient: link-local и join-подсеть kube-ovn.
+          - ipBlock:
+              cidr: 169.254.7.127/32
+          - ipBlock:
+              cidr: 100.96.0.0/16
+        ports:
+          - port: 8080
+          - port: 8443
+          - port: 9090
+          - port: 15008
+  - name: httpd
+    selector:
+      app.kubernetes.io/name: eventing-kafka-manifests
+    ingress:
+      - from:
+          - namespace: ecpk-knative-eventing
+          - namespace: ecpk-knative-operator
+          - namespace: kube-system
+          - ipBlock:
+              cidr: 169.254.7.127/32
+          - ipBlock:
+              cidr: 100.96.0.0/16
+        ports:
+          - port: 8080
+          - port: 15008
+
+authzpol:
+  - name: wh
+    action: ALLOW
+    selector:
+      app: eventing-webhook
+    rules:
+      - from:
+          namespaces:
+            - ecpk-knative-eventing
+            - ecpk-knative-serving
+            - ecpk-knative-kafka
+            - ecpk-knative-operator
+            - kube-system
+        ports:
+          - port: 443
+          - port: 8443
+      # kube-apiserver вне сетки: проходит только по адресу.
+      - from:
+          ipBlocks:
+            - 100.96.0.0/16
+        ports:
+          - port: 8443
+  - name: kwh
+    action: ALLOW
+    selector:
+      app: kafka-webhook-eventing
+    rules:
+      - from:
+          namespaces:
+            - ecpk-knative-eventing
+            - ecpk-knative-serving
+            - ecpk-knative-kafka
+            - ecpk-knative-operator
+            - kube-system
+        ports:
+          - port: 443
+          - port: 8443
+      # kube-apiserver вне сетки: проходит только по адресу.
+      - from:
+          ipBlocks:
+            - 100.96.0.0/16
+        ports:
+          - port: 8443
+  - name: brcv
+    action: ALLOW
+    selector:
+      app: kafka-broker-receiver
+    rules:
+      - from:
+          namespaces:
+            - ecpk-knative-eventing
+            - ecpk-knative-serving
+            - ecpk-knative-kafka
+            - ecpk-knative-operator
+            - kube-system
+        ports:
+          - port: 8080
+          - port: 8443
+          - port: 9090
+  - name: bdsp
+    action: ALLOW
+    selector:
+      app: kafka-broker-dispatcher
+    rules:
+      - from:
+          namespaces:
+            - ecpk-knative-eventing
+            - ecpk-knative-serving
+            - ecpk-knative-kafka
+            - ecpk-knative-operator
+            - kube-system
+        ports:
+          - port: 8080
+          - port: 8443
+          - port: 9090
+  - name: crcv
+    action: ALLOW
+    selector:
+      app: kafka-channel-receiver
+    rules:
+      - from:
+          namespaces:
+            - ecpk-knative-eventing
+            - ecpk-knative-serving
+            - ecpk-knative-kafka
+            - ecpk-knative-operator
+            - kube-system
+        ports:
+          - port: 8080
+          - port: 8443
+          - port: 9090
+  - name: cdsp
+    action: ALLOW
+    selector:
+      app: kafka-channel-dispatcher
+    rules:
+      - from:
+          namespaces:
+            - ecpk-knative-eventing
+            - ecpk-knative-serving
+            - ecpk-knative-kafka
+            - ecpk-knative-operator
+            - kube-system
+        ports:
+          - port: 8080
+          - port: 8443
+          - port: 9090
+  - name: srcv
+    action: ALLOW
+    selector:
+      app: kafka-sink-receiver
+    rules:
+      - from:
+          namespaces:
+            - ecpk-knative-eventing
+            - ecpk-knative-serving
+            - ecpk-knative-kafka
+            - ecpk-knative-operator
+            - kube-system
+        ports:
+          - port: 8080
+          - port: 8443
+          - port: 9090
+  - name: sdisp
+    action: ALLOW
+    selector:
+      app: kafka-source-dispatcher
+    rules:
+      - from:
+          namespaces:
+            - ecpk-knative-eventing
+            - ecpk-knative-serving
+            - ecpk-knative-kafka
+            - ecpk-knative-operator
+            - kube-system
+        ports:
+          - port: 8080
+          - port: 8443
+          - port: 9090
+  - name: dedup
+    action: ALLOW
+    selector:
+      app: broker-ingress-dedup
+    rules:
+      - from:
+          namespaces:
+            - ecpk-knative-eventing
+            - ecpk-knative-serving
+            - ecpk-knative-kafka
+            - ecpk-knative-operator
+            - kube-system
+        ports:
+          - port: 8080
+          - port: 8443
+          - port: 9090
+  - name: httpd
+    action: ALLOW
+    selector:
+      app.kubernetes.io/name: eventing-kafka-manifests
+    rules:
+      - from:
+          namespaces:
+            - ecpk-knative-eventing
+            - ecpk-knative-operator
+            - kube-system
+        ports:
+          - port: 8080

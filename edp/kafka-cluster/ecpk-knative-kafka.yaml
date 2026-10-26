@@ -1,0 +1,74 @@
+# Kafka EDP techsec-dev. Неймспейс ecpk-knative-kafka, имя кластера knative-kafka-server.
+# Так записаны bootstrap и брокеры в таблице размещения ТПР.
+# Bootstrap: knative-kafka-server-kafka-bootstrap.ecpk-knative-kafka.svc.cluster.local:9092
+name: knative-kafka-server
+project: "ecpk"
+version: "4.2.1"
+metadataVersion: "4.2-IV1"
+argo: false
+instAlauda: "C3"
+
+clusterLabel: "edp"
+
+controller:
+  replicas: 3
+  pvc: "16Gi"
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+
+broker:
+  replicas: 3
+  pvc: "512Gi"
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+
+storage:
+  class: "ceph-rbd"
+  deleteClaim: true
+
+jvm:
+  Xms: "512m"
+  Xmx: "1024m"
+
+config:
+  auto.create.topics.enable: "true"
+  num.partitions: 3
+  default.replication.factor: 3
+  min.insync.replicas: 2
+  offsets.topic.replication.factor: 3
+  transaction.state.log.replication.factor: 3
+  transaction.state.log.min.isr: 2
+
+enableAntiAffinity: true
+enableMonitoring: false
+enableExporter: false
+
+externalListeners:
+  enable: false
+
+superUser:
+  enable: true
+
+kafkaUI:
+  enable: true
+  image: registry-gl.ecpk-rosneft.ru/ecpk-dbaas-tools/kafka-ui:v0.7.2
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 300m
+      memory: 256Mi
+
+strimziRegistry:
+  enable: false

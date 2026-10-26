@@ -1,0 +1,47 @@
+# Чарт namespace 7.0.3. EDP, контур techsec-dev, считаем продом.
+# Имя из ТПР, не по формуле {project}-{cluster}-ns-*.
+# Квота в ТПР: 9 CPU и 11Gi. Сумма limits подов по таблице компонентов выше,
+# поэтому здесь запас под эти поды.
+enabled: true
+
+identity:
+  instance: ed
+  cluster: tco
+  project: ecpk
+
+global:
+  namespacePurpose: eventing
+  namespaceOverride: ecpk-knative-eventing
+
+namespace:
+  displayName: ecpk-knative-eventing
+  role: other
+  creator: lk
+  podSecurity: ""
+  cpaas:
+    cluster: techsec-dev
+    project: ecpk
+
+serviceMesh:
+  enabled: true
+  discovery: false
+  never: false
+  waypoint: false
+
+resourceQuotas:
+  limits:
+    cpu: "16"
+    memory: "24Gi"
+  requests:
+    cpu: "8"
+    memory: "12Gi"
+  podsAmount: 200
+  storage:
+    topolvm-mu: ""
+    topolvm-ri: ""
+    ceph-rbd: ""
+    ceph-rgw: ""
+    cephfs-hot: ""
+
+subnet:
+  enabled: false

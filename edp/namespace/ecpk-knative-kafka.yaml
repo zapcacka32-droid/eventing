@@ -1,0 +1,46 @@
+# Чарт namespace 7.0.3. EDP, контур techsec-dev, считаем продом.
+# Имя из таблицы размещения ТПР: ecpk-knative-kafka.
+# Квота ТПР: 10 CPU, 18Gi, 1.8 TiB. StorageClass: ceph-rbd.
+enabled: true
+
+identity:
+  instance: ed
+  cluster: tco
+  project: ecpk
+
+global:
+  namespacePurpose: kafka
+  namespaceOverride: ecpk-knative-kafka
+
+namespace:
+  displayName: ecpk-knative-kafka
+  role: other
+  creator: lk
+  podSecurity: ""
+  cpaas:
+    cluster: techsec-dev
+    project: ecpk
+
+serviceMesh:
+  enabled: true
+  discovery: false
+  never: false
+  waypoint: false
+
+resourceQuotas:
+  limits:
+    cpu: "10"
+    memory: "18Gi"
+  requests:
+    cpu: "10"
+    memory: "18Gi"
+  podsAmount: 200
+  storage:
+    topolvm-mu: ""
+    topolvm-ri: ""
+    ceph-rbd: "1844Gi"
+    ceph-rgw: ""
+    cephfs-hot: ""
+
+subnet:
+  enabled: false
