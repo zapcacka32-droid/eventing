@@ -15,3 +15,4 @@ policies-main.zip filter=lfs diff=lfs merge=lfs -text
 subnet-main.zip filter=lfs diff=lfs merge=lfs -text
 ingress-gateway-main-templates.zip filter=lfs diff=lfs merge=lfs -text
 knative-operator-main.zip filter=lfs diff=lfs merge=lfs -text
+knative-operator-main filter=lfs diff=lfs merge=lfs -text
