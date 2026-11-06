@@ -16,3 +16,4 @@ subnet-main.zip filter=lfs diff=lfs merge=lfs -text
 ingress-gateway-main-templates.zip filter=lfs diff=lfs merge=lfs -text
 knative-operator-main.zip filter=lfs diff=lfs merge=lfs -text
 knative-operator-main filter=lfs diff=lfs merge=lfs -text
+ai-catalog-guide.yml filter=lfs diff=lfs merge=lfs -text
