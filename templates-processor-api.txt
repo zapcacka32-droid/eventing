@@ -1,0 +1,455 @@
+
+==== /api/group ====
+{
+  "post": {
+    "security": [
+      {
+        "ApiKeyAuth": []
+      }
+    ],
+    "description": "Создает группу (namespace) в GitLab",
+    "consumes": [
+      "application/json"
+    ],
+    "produces": [
+      "application/json"
+    ],
+    "tags": [
+      "Groups"
+    ],
+    "summary": "Создание новой группы",
+    "parameters": [
+      {
+        "description": "Параметры группы",
+        "name": "input",
+        "in": "body",
+        "required": true,
+        "schema": {
+          "$ref": "#/definitions/httpctrl.CreateGroupBody"
+        }
+      }
+    ],
+    "responses": {
+      "201": {
+        "description": "Created",
+        "schema": {
+          "$ref": "#/definitions/httpctrl.CreateNewGroup"
+        }
+      },
+      "400": {
+        "description": "Ошибка валидации",
+        "schema": {
+          "$ref": "#/definitions/httpctrl.ErrorResponse"
+        }
+      },
+      "401": {
+        "description": "Неверный API-ключ",
+        "schema": {
+          "$ref": "#/definitions/httpctrl.ErrorResponse"
+        }
+      },
+      "409": {
+        "description": "Группа уже существует",
+        "schema": {
+          "$ref": "#/definitions/httpctrl.GroupAlreadyExists"
+        }
+      },
+      "500": {
+        "description": "Внутренняя ошибка сервера",
+        "schema": {
+          "$ref": "#/definitions/httpctrl.ErrorResponse"
+        }
+      }
+    }
+  }
+}
+==== /api/project ====
+{
+  "post": {
+    "security": [
+      {
+        "ApiKeyAuth": []
+      }
+    ],
+    "description": "Генерирует проект на основе стека, создает репозиторий и настраивает CI/CD",
+    "consumes": [
+      "application/json"
+    ],
+    "produces": [
+      "application/json"
+    ],
+    "tags": [
+      "Projects"
+    ],
+    "summary": "Создание нового проекта",
+    "parameters": [
+      {
+        "description": "Параметры нового проекта",
+        "name": "input",
+        "in": "body",
+        "required": true,
+        "schema": {
+          "$ref": "#/definitions/httpctrl.CreateNewProjectBody"
+        }
+      }
+    ],
+    "responses": {
+      "201": {
+        "description": "Информация о созданном проекте",
+        "schema": {
+          "$ref": "#/definitions/domain.Project"
+        }
+      },
+      "400": {
+        "description": "Ошибка валидации или неизвестный стек",
+        "schema": {
+          "$ref": "#/definitions/httpctrl.ErrorResponse"
+        }
+      },
+      "401": {
+        "description": "Неверный API-ключ",
+        "schema": {
+          "$ref": "#/definitions/httpctrl.ErrorResponse"
+        }
+      },
+      "500": {
+        "description": "Внутренняя ошибка сервера",
+        "schema": {
+          "$ref": "#/definitions/httpctrl.ErrorResponse"
+        }
+      }
+    }
+  }
+}
+==== /v1/task ====
+{
+  "post": {
+    "security": [
+      {
+        "ApiKeyAuth": []
+      }
+    ],
+    "description": "Принимает задачу в формате SyncWave и создает новый GitLab-репозиторий с выбранным шаблоном",
+    "consumes": [
+      "application/json"
+    ],
+    "produces": [
+      "application/json"
+    ],
+    "tags": [
+      "SyncWave"
+    ],
+    "summary": "Создание проекта через SyncWave",
+    "parameters": [
+      {
+        "description": "Задача SyncWave",
+        "name": "input",
+        "in": "body",
+        "required": true,
+        "schema": {
+          "$ref": "#/definitions/httpctrl.SyncWaveTaskBody"
+        }
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "OK",
+        "schema": {
+          "$ref": "#/definitions/httpctrl.SyncWaveTaskResponse"
+        }
+      },
+      "400": {
+        "description": "Некорректный запрос",
+        "schema": {
+          "$ref": "#/definitions/httpctrl.ErrorResponse"
+        }
+      },
+      "401": {
+        "description": "Неверный API-ключ",
+        "schema": {
+          "$ref": "#/definitions/httpctrl.ErrorResponse"
+        }
+      },
+      "500": {
+        "description": "Внутренняя ошибка сервера",
+        "schema": {
+          "$ref": "#/definitions/httpctrl.ErrorResponse"
+        }
+      }
+    }
+  }
+}
+==== definitions ====
+
+## domain.Project
+{
+  "description": "Детальная информация о созданном репозитории в GitLab.",
+  "type": "object",
+  "properties": {
+    "created_at": {
+      "description": "Дата создания проекта (ISO 8601).",
+      "type": "string",
+      "example": "2023-10-15T12:00:00Z"
+    },
+    "http_url_to_repo": {
+      "description": "HTTP-ссылка для клонирования репозитория.",
+      "type": "string",
+      "example": "https://gitlab.com/my-group/my-awesome-project.git"
+    },
+    "id": {
+      "description": "Уникальный идентификатор проекта в GitLab.",
+      "type": "integer",
+      "example": 4242
+    },
+    "namespace_id": {
+      "description": "ID пространства имен (группы), в которой находится проект.",
+      "type": "integer",
+      "example": 101
+    },
+    "ssh_url_to_repo": {
+      "description": "SSH-ссылка для клонирования репозитория.",
+      "type": "string",
+      "example": "git@gitlab.com:my-group/my-awesome-project.git"
+    },
+    "web_url": {
+      "description": "Ссылка на веб-интерфейс проекта в GitLab.",
+      "type": "string",
+      "example": "https://gitlab.com/my-group/my-awesome-project"
+    }
+  }
+}
+## httpctrl.CreateGroupBody
+{
+  "description": "Параметры запроса для создания новой группы (Namespace).",
+  "type": "object",
+  "required": [
+    "name"
+  ],
+  "properties": {
+    "name": {
+      "description": "Название группы (используется в URL и как имя группы).",
+      "type": "string",
+      "example": "backend-team"
+    },
+    "parent_id": {
+      "description": "ID родительской группы.\nОставьте пустым (null), если хотите создать корневую группу.",
+      "type": "integer",
+      "example": 55
+    }
+  }
+}
+## httpctrl.CreateNewGroup
+{
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "example": "123"
+    }
+  }
+}
+## httpctrl.CreateNewProjectBody
+{
+  "description": "Параметры запроса для генерации нового проекта.",
+  "type": "object",
+  "required": [
+    "app_name",
+    "stack"
+  ],
+  "properties": {
+    "app_name": {
+      "description": "Имя приложения. Будет использовано как название репозитория в GitLab.",
+      "type": "string",
+      "example": "payment-service"
+    },
+    "namespace_id": {
+      "description": "ID группы (Namespace) в GitLab, в которой нужно создать проект.\nЕсли null, проект может быть создан в корне или личном пространстве (зависит от логики генератора).",
+      "type": "integer",
+      "example": 101
+    },
+    "recreate": {
+      "description": "Recreate — если true и проект с таким именем уже есть в GitLab, он будет удалён и создан заново.",
+      "type": "boolean",
+      "example": false
+    },
+    "stack": {
+      "description": "Технологический стек (шаблон), который нужно развернуть.\nНапример: 'clean' (Clean Architecture), 'monolith', 'worker' и т.д.",
+      "type": "string",
+      "example": "clean"
+    },
+    "use_generic_chart": {
+      "description": "Флаг использования стандартного Helm чарта (Generic Chart).\nЕсли true, в проект будут добавлены стандартные манифесты Kubernetes.",
+      "type": "boolean",
+      "example": true
+    }
+  }
+}
+## httpctrl.GroupAlreadyExists
+{
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "example": "123"
+    },
+    "message": {
+      "type": "string",
+      "example": "group already exists"
+    }
+  }
+}
+## httpctrl.SyncWaveCreateProjectParams
+{
+  "description": "Параметры SyncWave для создания нового GitLab-проекта из шаблона.",
+  "type": "object",
+  "required": [
+    "app_name",
+    "namespace_id",
+    "stack"
+  ],
+  "properties": {
+    "app_name": {
+      "description": "Имя создаваемого приложения. Используется как имя репозитория GitLab и как appname в шаблоне.",
+      "type": "string",
+      "example": "payment-service"
+    },
+    "namespace_id": {
+      "description": "ID существующей группы GitLab (namespace), внутри которой нужно создать репозиторий.\nЭто именно namespace_id проекта, не parent_id группы.",
+      "type": "integer",
+      "example": 101
+    },
+    "recreate": {
+      "description": "Если true и проект с таким именем уже существует в указанном namespace, он будет удален и создан заново.",
+      "type": "boolean",
+      "example": false
+    },
+    "stack": {
+      "description": "Название шаблона/стека, который нужно применить к репозиторию.\nЗначение должно существовать в каталоге доступных стеков сервиса.",
+      "type": "string",
+      "example": "clean"
+    },
+    "use_generic_chart": {
+      "description": "Если true, в проект будут добавлены стандартные манифесты Kubernetes из Generic Chart.",
+      "type": "boolean",
+      "example": true
+    }
+  }
+}
+## httpctrl.SyncWaveProjectReturn
+{
+  "description": "Данные созданного GitLab-проекта, возвращаемые SyncWave.",
+  "type": "object",
+  "properties": {
+    "created_at": {
+      "description": "Дата и время создания проекта в GitLab.",
+      "type": "string",
+      "example": "2026-07-22T12:00:00Z"
+    },
+    "http_url_to_repo": {
+      "description": "HTTPS URL для клонирования репозитория.",
+      "type": "string",
+      "example": "https://gitlab.example.com/backend/payment-service.git"
+    },
+    "id": {
+      "description": "ID созданного проекта в GitLab.",
+      "type": "integer",
+      "example": 4242
+    },
+    "namespace_id": {
+      "description": "ID группы GitLab (namespace), в которой был создан проект.",
+      "type": "integer",
+      "example": 101
+    },
+    "ssh_url_to_repo": {
+      "description": "SSH URL для клонирования репозитория.",
+      "type": "string",
+      "example": "git@gitlab.example.com:backend/payment-service.git"
+    },
+    "web_url": {
+      "description": "Ссылка на проект в веб-интерфейсе GitLab.",
+      "type": "string",
+      "example": "https://gitlab.example.com/backend/payment-service"
+    }
+  }
+}
+## httpctrl.SyncWaveTaskBody
+{
+  "description": "Унифицированный запрос SyncWave на выполнение операции модуля.",
+  "type": "object",
+  "required": [
+    "action",
+    "params",
+    "resource",
+    "taskId"
+  ],
+  "properties": {
+    "action": {
+      "description": "Действие над ресурсом. Для этой ручки поддерживается только create.",
+      "type": "string",
+      "example": "create"
+    },
+    "params": {
+      "description": "Параметры создания проекта GitLab с шаблоном.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/httpctrl.SyncWaveCreateProjectParams"
+        }
+      ]
+    },
+    "proposalId": {
+      "description": "Идентификатор заявки SyncWave. Заполняется SyncWave автоматически.",
+      "type": "string",
+      "example": "proposal-123"
+    },
+    "resource": {
+      "description": "Тип ресурса, который нужно создать. Для этой ручки поддерживается создание проекта/репозитория.\nДопустимые значения: project, repository, repo.",
+      "type": "string",
+      "example": "project"
+    },
+    "standId": {
+      "description": "Идентификатор стенда, для которого выполняется задача.\nВозможные значения зависят от каталога SyncWave, обычно: dev, test, prod.",
+      "type": "string",
+      "example": "dev"
+    },
+    "taskId": {
+      "description": "Уникальный идентификатор задачи SyncWave. Заполняется SyncWave автоматически.",
+      "type": "string",
+      "example": "task-123"
+    },
+    "techName": {
+      "description": "Техническое имя продукта из заявки SyncWave. Используется только как справочная информация.",
+      "type": "string",
+      "example": "payment-service"
+    }
+  }
+}
+## httpctrl.SyncWaveTaskResponse
+{
+  "description": "Унифицированный ответ SyncWave на выполнение операции модуля.",
+  "type": "object",
+  "properties": {
+    "message": {
+      "description": "Краткое сообщение о результате выполнения.",
+      "type": "string",
+      "example": "project created"
+    },
+    "return": {
+      "description": "Данные созданного GitLab-проекта, которые SyncWave может использовать в следующих шагах workflow.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/httpctrl.SyncWaveProjectReturn"
+        }
+      ]
+    },
+    "success": {
+      "description": "Признак успешного выполнения задачи.",
+      "type": "boolean",
+      "example": true
+    },
+    "taskId": {
+      "description": "Уникальный идентификатор задачи SyncWave из входящего запроса.",
+      "type": "string",
+      "example": "task-123"
+    }
+  }
+}
