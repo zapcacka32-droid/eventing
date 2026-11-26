@@ -22,3 +22,4 @@ gradle.tar.gz filter=lfs diff=lfs merge=lfs -text
 gradle-tests.tar.gz filter=lfs diff=lfs merge=lfs -text
 egress-gateway-main.zip filter=lfs diff=lfs merge=lfs -text
 egress.tar.gz filter=lfs diff=lfs merge=lfs -text
+syncwave.tar.gz filter=lfs diff=lfs merge=lfs -text
